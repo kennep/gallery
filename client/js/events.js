@@ -1,3 +1,5 @@
+'use strict';
+
 var eventListeners = {};
 
 function emit(eventType, event) {

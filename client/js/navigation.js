@@ -1,3 +1,5 @@
+'use strict';
+
 var events = require('./events');
 
 function navigateTo(currentPath, newPath) {

@@ -1,15 +1,45 @@
-.browsehappy {
-  margin: 0.2em 0;
-  background: #ccc;
-  color: #000;
-  padding: 0.2em 0;
+.breadcrumb {
+	border-radius: 0px;
 }
 
-.col-sm-2 img {
-	width: 100%;
+.thumbs {
+	margin: auto;
 }
 
-.fileIcon {
-	font-size: 60px;
+.thumb {
+	float: left;
+	width: 128px;
+	margin: 0px;
+	padding: 4px;
+}
+
+.thumb i {
+	display: block;
+	font-size: 120px;
+	width: 120px;
+	height: 120px;
 	text-align: center;
 }
+
+.thumb svg {
+	display: block;
+	font-size: 120px;
+	width: 120px;
+	height: 120px;
+	padding: 12px;
+	text-align: center;
+}
+
+.thumb img {
+	display: block;
+	width: 120px;
+	height: 120px;
+}
+
+.thumb > div {
+	text-align: center;
+	width: 120px;
+	height: 3em;
+	overflow: hidden;
+}
+

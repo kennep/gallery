@@ -1,5 +1,8 @@
+'use strict';
+
 var React = require('react');
-var Icon = require('./icon');
+var FolderIcon = require('./foldericon');
+var ImageIcon = require('./imageicon');
 var navigation = require('./navigation');
 
 var Thumbnail = React.createClass({
@@ -8,22 +11,31 @@ var Thumbnail = React.createClass({
 		var component = this;
 		var file = this.props.file;
 		
-		function handleClick(event) {
+		function handleFolderClick(event) {
 			event.preventDefault();
 			navigation.navigateTo(component.props.path, file.name);
 		}
+		
+		function handleFileClick(event) {
+			event.preventDefault();
+		}
 	
+		var linkTarget, clickHandler, thumbnailImage;
+	
+		linkTarget = navigation.makeUrl(this.props.path, file.name);
 		if(file.isDir) {
-			return <div className="col-sm-2" key={file.name}>
-					 <a href={navigation.makeUrl(component.props.path, file.name)} 
-					       onClick={handleClick}><Icon name={file.name} /></a></div>;
+			clickHandler = handleFolderClick;
+			thumbnailImage = <FolderIcon />;
+		} else {
+			clickHandler = handleFileClick;
+			thumbnailImage = <ImageIcon />;
+			if(file.thumbnailUrl) thumbnailImage = <img src={file.thumbnailUrl} alt={file.name} />;
 		}
 			
-		var img = "";
-		if(file.url) {
-			img = <img src={file.url} alt={file.name} />;
-		}
-		return <div className="col-sm-2" key={file.name}>{img}{file.name}</div>;
+		return <div className="thumb" key={file.name}>
+			     <a href={linkTarget} onClick={clickHandler}>{thumbnailImage}</a>
+		         <div><a href={linkTarget} onClick={clickHandler}>{file.name}</a></div>
+		       </div>;
   	}
 });
 

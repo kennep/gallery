@@ -1,14 +1,20 @@
+'use strict';
+
 var fs = require('fs');
 var path = require('path');
-var mime = require('mime');
 var express = require('express');
 var morgan = require('morgan');
 var Log = require('log');
 var log = new Log('debug');
 
+var queue = require('./queue');
+var model = require('../shared/model');
+
 var app = express();
 
-var ROOT = "/Users/kenneth/Dropbox";
+// Deprecated, remove these
+var ROOT = "/Volumes/Privat/Bilder";
+var THUMBNAILS = "/Volumes/Privat/Bilder/.Thumbnails";
 
 app.use(morgan('combined'));
 
@@ -36,9 +42,8 @@ function resolvePath(pathname) {
 	return path.resolve(ROOT, "." + pathname);
 }
 
-function isGalleryFile(name) {
-	var mimeType = mime.lookup(name);
-	return (mimeType.indexOf("image/") === 0 || mimeType.indexOf("video/") === 0);
+function isGalleryFile(file) {
+	return (file.mimeType.indexOf("image/") === 0 || file.mimeType.indexOf("video/") === 0);
 }
 
 function statAll(root, files, callback) {
@@ -49,14 +54,21 @@ function statAll(root, files, callback) {
 		log.debug("Begin stat: %s", fullPath);
 		fs.stat(fullPath, function(err, stat) {
 			log.debug("Stat complete: %s", fullPath);
+			var fileObject;
 			if(err) {
 				log.error("Error stat-ing %s: %s", fullPath, err);
-				fileObjects.push({name: name, error: err});
+				fileObject = new model.File(name, err);
 			} else {
-				fileObjects.push({
-					name: name,
-				    isDir: stat.isDirectory()});
+				if(stat.isDirectory()) {
+					fileObject = new model.Directory(name);
+				} else {
+					fileObject = new model.File(name);
+				}
+				queue.submit(root, fileObject, function() {
+					log.debug("Invoked callback!");
+				});
 			}
+			fileObjects.push(fileObject);
 			count--;
 			if(count === 0) {
 				callback(fileObjects);
@@ -74,7 +86,7 @@ function statAll(root, files, callback) {
 
 function filterFiles(fileObjects) {
 	return fileObjects.filter(function(file) { 
-					return file.isDir || isGalleryFile(file.name);
+					return file.isDir || isGalleryFile(file);
 				});
 }
 
@@ -111,7 +123,7 @@ io.on('connection', function (socket) {
 				socket.emit('files', {path: event.path, error: err});
 				return;
 			} 
-			statAll(fullPath, files, function(fileObjects) {
+			statAll(path, files, function(fileObjects) {
 				log.debug("Stat completed: %s", JSON.stringify(fileObjects));
 				fileObjects = filterFiles(fileObjects);
 				sortFiles(fileObjects);

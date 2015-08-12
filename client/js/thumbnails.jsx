@@ -1,3 +1,5 @@
+'use strict';
+
 var React = require('react');
 var Thumbnail = require('./thumbnail');
 
@@ -9,7 +11,7 @@ var Thumbnails = React.createClass({
 			return <Thumbnail path={component.props.path} file={file} />;
 		});
 						
-		return <div className="row">
+		return <div className="thumbs">
 		         {thumbnails}
 			   </div>;
   	}
